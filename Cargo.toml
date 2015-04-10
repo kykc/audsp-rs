@@ -1,0 +1,7 @@
+[package]
+name = "hello_float"
+version = "0.0.1"
+authors = ["kykc <ya@tomatl.org>"]
+
+[dependencies]
+num = "*"

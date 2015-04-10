@@ -1,0 +1,71 @@
+extern crate num;
+
+use num::Num;
+use num::Complex;
+use num::Zero;
+
+fn add<T: Num>(x: T, y: T) -> T {
+	x + y
+}
+
+pub struct SecondOrderSection<TReal> {
+    pub acs: [TReal; 3],
+    pub bcs: [TReal; 3]
+}
+
+pub struct DFOneState<TReal> {
+    pub xvs: [TReal; 2],
+    pub yvs: [TReal; 2]
+}
+
+pub struct DFOneBiQuad<TReal: Num> {
+    pub coeffs: SecondOrderSection<TReal>,
+    pub state: DFOneState<TReal>
+}
+
+impl<TReal: Num> SecondOrderSection<TReal> {
+    #[inline]
+    pub fn nil() -> SecondOrderSection<TReal> {
+        SecondOrderSection{acs: [TReal::zero(), TReal::zero(), TReal::zero()], bcs: [TReal::zero(), TReal::zero(), TReal::zero()]}
+    }
+
+    pub fn one() -> SecondOrderSection<TReal> {
+        SecondOrderSection{acs: [TReal::zero(), TReal::zero(), TReal::zero()], bcs: [TReal::one(), TReal::zero(), TReal::zero()]}
+    }
+}
+
+impl<TReal: Num> DFOneState<TReal> {
+    pub fn nil() -> DFOneState<TReal> {
+        DFOneState{xvs: [TReal::zero(), TReal::zero()], yvs: [TReal::zero(), TReal::zero()]}
+    }
+}
+
+impl<TReal: Num> DFOneBiQuad<TReal> {
+    pub fn one() -> DFOneBiQuad<TReal> {
+        DFOneBiQuad{coeffs: SecondOrderSection::<TReal>::one(), state: DFOneState::<TReal>::nil()}
+    }
+
+    fn process(&mut self, buffer: &mut Vec<TReal>) {
+        for i in 0..buffer.len() {
+            let mut y: TReal = buffer[i]
+        }
+    }
+}
+
+
+fn process<TSample: Num>(filter: &mut DFOneBiQuad<TSample>) {
+}
+
+fn main() {
+	let zz: f32 = add(2.5f32, 3.2f32);
+	let z: f64 = add(2.5f64, 3.33f64);
+	let complex: Complex<f32> = Complex{ re: 1.0, im: 2.0 };
+
+        let mut buffer: Vec<f32> = vec![0.0; 512];
+        buffer[0] = 1.0;
+
+	let mut filter = DFOneBiQuad::<f32>::one();
+
+        filter.coeffs.bcs[1] = 0.5;
+        filter.process(&mut buffer);
+}
