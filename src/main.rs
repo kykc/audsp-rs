@@ -1,14 +1,10 @@
 extern crate num;
-extern crate libc;
+//extern crate libc;
 
 use num::Num;
 use num::Zero;
 use std::cmp;
-
-
-use libc::{c_void, size_t, malloc, free};
-use std::mem;
-use std::ptr;
+use std::slice;
 
 pub struct SecondOrderSection<TReal> {
     pub acs: [TReal; 3],
@@ -90,17 +86,19 @@ fn process_iir_cascade<TReal: Num + Copy>(filters: &mut [&mut BiQuadFilter<TReal
 }
 
 #[no_mangle]
-pub unsafe extern fn c_process32(input: *mut f32, output: *mut f32, acs: *const f32, bcs: *const f32, buffer_length: *const usize) {
+pub unsafe extern fn c_process32(input: *const f32, output: *mut f32, cacs: *const f32, cbcs: *const f32, buffer_length: *const usize) {
 
     let mut filter = DFOneBiQuad::<f32>::one();
 
-    for i in 0..3i32 {
-        filter.coeffs.acs[i] = *acs.offset(i);
+    for i in 0..3 {
+        filter.coeffs.acs[i as usize] = *cacs.offset(i);
+        filter.coeffs.bcs[i as usize] = *cbcs.offset(i);
     }
 
-    for i in 0..*buffer_length {
+    let inp = slice::from_raw_parts(input, *buffer_length);
+    let mut outp = slice::from_raw_parts_mut(output, *buffer_length);
 
-    }
+    filter.process(&inp, &mut outp);
 }
 
 fn main() {
@@ -115,7 +113,6 @@ fn main() {
         filter.init(&acs, &bcs);
 
         let mut filter2 = DFOneBiQuad::<f32>::create(&filter.coeffs.acs, &filter.coeffs.bcs);
-
         //filter.process(&mut buffer);
         process_iir_cascade(&mut [&mut filter, &mut filter2], & buffer, &mut output);
 
