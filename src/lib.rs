@@ -5,6 +5,8 @@ use num::Num;
 use num::Zero;
 use std::cmp;
 use std::slice;
+use std::ptr;
+use std::boxed;
 
 #[repr(u8)]
 pub enum c_void {
@@ -95,13 +97,7 @@ fn process_iir_cascade<TReal: Num + Copy>(filters: &mut [&mut BiQuadFilter<TReal
 }
 
 #[no_mangle]
-pub unsafe extern fn bork(data: *mut c_void) {
-    let object: &DFOneBiQuad<f32> = &mut *(data as *mut DFOneBiQuad<f32>);
-    println!("{}", object.coeffs.acs[0]);
-}
-
-#[no_mangle]
-pub unsafe extern fn c_process32(filter: *mut c_void, input: *const f32, output: *mut f32, buffer_length: usize) {
+pub unsafe extern fn filt_process32(filter: *mut c_void, input: *const f32, output: *mut f32, buffer_length: usize) {
 
     let filter: &mut DFOneBiQuad<f32> = &mut *(filter as *mut DFOneBiQuad<f32>);
 
@@ -112,6 +108,14 @@ pub unsafe extern fn c_process32(filter: *mut c_void, input: *const f32, output:
 }
 
 #[no_mangle]
-pub extern fn c_dummy() {
-   println!("zhopa");
+pub unsafe extern fn filt_init32(filter: *mut c_void, acs: *const f32, bcs: *const f32) {
+
+    let filter: &mut DFOneBiQuad<f32> = &mut *(filter as *mut DFOneBiQuad<f32>);
+
+    for i in 0..3 {
+        filter.coeffs.acs[i] = *acs.offset(i as isize);
+        filter.coeffs.bcs[i] = *bcs.offset(i as isize);
+        filter.state.xvs[i] = 0.0;
+        filter.state.yvs[i] = 0.0;
+    }
 }

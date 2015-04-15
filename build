@@ -1,4 +1,4 @@
 #!/bin/sh
 
 cargo build
-g++ -fPIC -pie -Wall -g cpp/main.cpp ./target/debug/libaudsp-dd9a49e695c92fff.a -ldl -lpthread -lrt -lgcc_s -lpthread -lc -lm -o ./target/debug/main
+g++ -std=c++11 -fPIC -pie -Wall -g cpp/main.cpp ./target/debug/libaudsp-dd9a49e695c92fff.a -ldl -lpthread -lrt -lgcc_s -lpthread -lc -lm -o ./target/debug/main
