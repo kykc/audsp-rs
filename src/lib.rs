@@ -6,24 +6,33 @@ use num::Zero;
 use std::cmp;
 use std::slice;
 
+#[repr(u8)]
+pub enum c_void {
+    __variant1,
+    __variant2,
+}
+
+#[repr(C)]
 pub struct SecondOrderSection<TReal> {
     pub acs: [TReal; 3],
     pub bcs: [TReal; 3]
 }
 
+#[repr(C)]
 pub struct DFOneState<TReal> {
     pub xvs: [TReal; 3],
     pub yvs: [TReal; 3]
 }
 
-pub trait BiQuadFilter<TReal: Num + Copy> {
-    fn process(&mut self, input: & [TReal], output: &mut[TReal]);
-    fn init(&mut self, acs: &[TReal; 3], bcs: &[TReal; 3]);
-}
-
+#[repr(C)]
 pub struct DFOneBiQuad<TReal: Num + Copy> {
     pub coeffs: SecondOrderSection<TReal>,
     pub state: DFOneState<TReal>
+}
+
+pub trait BiQuadFilter<TReal: Num + Copy> {
+    fn process(&mut self, input: & [TReal], output: &mut[TReal]);
+    fn init(&mut self, acs: &[TReal; 3], bcs: &[TReal; 3]);
 }
 
 impl<TReal: Num + Copy> SecondOrderSection<TReal> {
@@ -86,37 +95,23 @@ fn process_iir_cascade<TReal: Num + Copy>(filters: &mut [&mut BiQuadFilter<TReal
 }
 
 #[no_mangle]
-pub unsafe extern fn c_process32(input: *const f32, output: *mut f32, cacs: *const f32, cbcs: *const f32, buffer_length: *const usize) {
+pub unsafe extern fn bork(data: *mut c_void) {
+    let object: &DFOneBiQuad<f32> = &mut *(data as *mut DFOneBiQuad<f32>);
+    println!("{}", object.coeffs.acs[0]);
+}
 
-    let mut filter = DFOneBiQuad::<f32>::one();
+#[no_mangle]
+pub unsafe extern fn c_process32(filter: *mut c_void, input: *const f32, output: *mut f32, buffer_length: usize) {
 
-    for i in 0..3 {
-        filter.coeffs.acs[i as usize] = *cacs.offset(i);
-        filter.coeffs.bcs[i as usize] = *cbcs.offset(i);
-    }
+    let filter: &mut DFOneBiQuad<f32> = &mut *(filter as *mut DFOneBiQuad<f32>);
 
-    let inp = slice::from_raw_parts(input, *buffer_length);
-    let mut outp = slice::from_raw_parts_mut(output, *buffer_length);
+    let inp = slice::from_raw_parts(input, buffer_length);
+    let mut outp = slice::from_raw_parts_mut(output, buffer_length);
 
     filter.process(&inp, &mut outp);
 }
 
-fn main() {
-
-        let mut buffer: Vec<f32> = vec![0.0; 512];
-        buffer[0] = 1.0;
-        let mut output: Vec<f32> = vec![0.0; 512];
-
-        let mut filter = DFOneBiQuad::<f32>::one();
-        let acs: [f32; 3] = [1.0, -1.56101807580072, 0.641351538057563];
-        let bcs: [f32; 3] = [0.0200833655642113, 0.0401667311284225, 0.0200833655642113];
-        filter.init(&acs, &bcs);
-
-        let mut filter2 = DFOneBiQuad::<f32>::create(&filter.coeffs.acs, &filter.coeffs.bcs);
-        //filter.process(&mut buffer);
-        process_iir_cascade(&mut [&mut filter, &mut filter2], & buffer, &mut output);
-
-        for i in 0..buffer.len() {
-            println!("{}", output[i]);
-        }
+#[no_mangle]
+pub extern fn c_dummy() {
+   println!("zhopa");
 }
