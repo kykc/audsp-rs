@@ -14,6 +14,11 @@ pub enum c_void {
     __variant2,
 }
 
+/*extern {
+    fn calloc(nitems: usize, size: usize) -> *mut c_void;
+    fn free(ptr: *mut c_void) -> ();
+}*/
+
 #[repr(C)]
 pub struct SecondOrderSection<TReal> {
     pub acs: [TReal; 3],
@@ -118,4 +123,40 @@ pub unsafe extern fn filt_init32(filter: *mut c_void, acs: *const f32, bcs: *con
         filter.state.xvs[i] = 0.0;
         filter.state.yvs[i] = 0.0;
     }
+}
+
+#[no_mangle]
+pub extern fn filt_create32() -> *mut DFOneBiQuad<f32> {
+
+    let mut obj = Box::new(DFOneBiQuad::<f32>::one());
+
+    // * derefs the Box into a Dramatic, the &mut re-borrows it into a regular
+    // reference.  The constraint ensures we coerce the &mut Dramatic into
+    // a *mut Dramatic, which "hides" the reference from the borrow checker.
+    let ptr: *mut _ = &mut *obj;
+
+    // Forget discards its argument (passed by-move), without trigger its
+    // destructor, if it has one.
+    unsafe { std::mem::forget(obj);}
+
+    ptr
+}
+
+#[no_mangle]
+pub extern "C" fn filt_destroy32(ptr: *mut DFOneBiQuad<f32>) {
+    // For is_null:
+    //use std::ptr::PtrExt;
+
+    // First, we **must** check to see if the pointer is null.
+    if ptr.is_null() {
+        // Do nothing.
+        return;
+    }
+
+    // Now, we know the pointer is non-null, we can continue.
+    let obj: Box<DFOneBiQuad<f32>> = unsafe { ::std::mem::transmute(ptr) };
+
+    // We don't *have* to do anything else; once obj goes out of scope, it will
+    // be dropped.  I'm going to drop it explicitly, however, for clarity.
+    ::std::mem::drop(obj);
 }

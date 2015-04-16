@@ -12,7 +12,38 @@ extern "C" {
 
 	void filt_process32(void* filter, const float* input, float* output, unsigned int buffer_length);
 	void filt_init32(void* filter, const float* as, const float* bs);
+	void* filt_create32();
+	void filt_destroy32(void*);
 }
+
+struct BiQuad32
+{
+private:
+	void* _handle;
+	// Non-copyable
+	BiQuad32(const BiQuad32&) {}
+public:
+
+	BiQuad32()
+	{
+		_handle = filt_create32();
+	}
+
+	void init(const float* as, const float* bs)
+	{
+		filt_init32(_handle, as, bs);
+	}
+
+	void processBlock(const float* input, float* output, unsigned int buffer_length)
+	{
+		filt_process32(_handle, input, output, buffer_length);
+	}
+
+	~BiQuad32()
+	{
+		filt_destroy32(_handle);
+	}
+};
 
 int main() {
 
@@ -23,13 +54,12 @@ int main() {
 
 	in[0] = 1.;
 
-	char* filter = new char[sizeof(float) * (6 + 6)];
-
 	array<float, 3> as = {1., -1.56101807580072, 0.641351538057563};
 	array<float, 3> bs = {0.0200833655642113, 0.0401667311284225, 0.0200833655642113};
 
-	filt_init32(filter, (const float*)&as, (const float*)&bs);
-	filt_process32(filter, in, out, 512);
+	BiQuad32 filter;
+	filter.init((const float*)&as, (const float*)&bs);
+	filter.processBlock(in, out, 512);
 
 	for (size_t i = 0; i < 512; ++i)
 	{
