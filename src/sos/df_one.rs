@@ -23,6 +23,12 @@ pub fn nil<TReal: Numeric>() -> DFOneState<TReal> {
     DFOneState {xvs: [TReal::zero(), TReal::zero(), TReal::zero()], yvs: [TReal::zero(), TReal::zero(), TReal::zero()]}
 }
 
+impl Default for ::sos::df_one::DFOneBiQuad<f32> {
+    fn default() -> ::sos::df_one::DFOneBiQuad<f32> {
+        ::sos::df_one::DFOneBiQuad::<f32>{coeffs: ::sos::one::<f32>(), state: ::sos::df_one::nil::<f32>()}
+    }
+}
+
 impl<TReal: Numeric> BiQuadFilter<TReal> for DFOneBiQuad<TReal> {
 
     fn init(&mut self, acs: &[TReal; 3], bcs: &[TReal; 3]) {
