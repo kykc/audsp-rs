@@ -14,6 +14,7 @@ extern "C" {
 	void filt_init32(void* filter, const float* as, const float* bs);
 	void* filt_create32();
 	void filt_destroy32(void*);
+	void filt_peaking32(void*, float, float, float, float);
 }
 
 struct BiQuad32
@@ -27,6 +28,11 @@ public:
 	BiQuad32()
 	{
 		_handle = filt_create32();
+	}
+
+	void peaking(float q, float gain, float f0, float fs)
+	{
+		filt_peaking32(_handle, q, gain, f0, fs);
 	}
 
 	void init(const float* as, const float* bs)
@@ -54,11 +60,12 @@ int main() {
 
 	in[0] = 1.;
 
-	array<float, 3> as = {1., -1.56101807580072, 0.641351538057563};
-	array<float, 3> bs = {0.0200833655642113, 0.0401667311284225, 0.0200833655642113};
+	//array<float, 3> as = {1., -1.56101807580072, 0.641351538057563};
+	//array<float, 3> bs = {0.0200833655642113, 0.0401667311284225, 0.0200833655642113};
 
 	BiQuad32 filter;
-	filter.init((const float*)&as, (const float*)&bs);
+	//filter.init((const float*)&as, (const float*)&bs);
+	filter.peaking(1, 6, 800, 48000);
 	filter.processBlock(in, out, 512);
 
 	for (size_t i = 0; i < 512; ++i)

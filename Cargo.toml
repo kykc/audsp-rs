@@ -1,5 +1,5 @@
 [package]
-name = "hello_float"
+name = "audsp"
 version = "0.0.1"
 authors = ["kykc <ya@tomatl.org>"]
 
