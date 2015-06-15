@@ -7,12 +7,14 @@ use std::cmp;
 use ::fcast;
 
 #[repr(C)]
-pub struct DFOneState<TReal> {
+#[derive(Copy, Clone)]
+pub struct DFOneState<TReal: Numeric> {
     pub xvs: [TReal; 3],
     pub yvs: [TReal; 3]
 }
 
 #[repr(C)]
+#[derive(Copy, Clone)]
 pub struct DFOneBiQuad<TReal: Numeric> {
     pub coeffs: SecondOrderSection<TReal>,
     pub state: DFOneState<TReal>
