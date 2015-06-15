@@ -3,17 +3,11 @@ use ::fcast;
 
 pub mod df_one;
 
-// TODO: implement clone trait
 #[repr(C)]
-pub struct SecondOrderSection<TReal> {
+#[derive(Copy, Clone)]
+pub struct SecondOrderSection<TReal: Numeric> {
     pub acs: [TReal; 3],
     pub bcs: [TReal; 3]
-}
-
-impl<TReal: Numeric> Clone for SecondOrderSection<TReal> {
-    fn clone(&self) -> Self {
-        SecondOrderSection::<TReal>{acs: self.acs, bcs: self.bcs}
-    }
 }
 
 #[inline]
