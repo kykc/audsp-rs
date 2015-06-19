@@ -4,7 +4,7 @@ pub mod sos;
 pub mod cinterop;
 pub mod zpk;
 
-pub trait Numeric: num::Float {
+pub trait Numeric: num::Float + Default {
     fn pi(Self) -> Self;
 }
 

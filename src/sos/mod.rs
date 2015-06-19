@@ -10,6 +10,12 @@ pub struct SecondOrderSection<TReal: Numeric> {
     pub bcs: [TReal; 3]
 }
 
+impl<TReal: Numeric> Default for SecondOrderSection<TReal> {
+    fn default() -> Self {
+        SecondOrderSection{acs: [TReal::zero(); 3], bcs: [TReal::zero(); 3]}
+    }
+}
+
 #[inline]
 pub fn nil<TReal: Numeric>() -> SecondOrderSection<TReal> {
     SecondOrderSection{acs: [TReal::zero(), TReal::zero(), TReal::zero()], bcs: [TReal::zero(), TReal::zero(), TReal::zero()]}

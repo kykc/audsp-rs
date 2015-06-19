@@ -13,8 +13,14 @@ pub struct DFOneState<TReal: Numeric> {
     pub yvs: [TReal; 3]
 }
 
+impl<TReal: Numeric> Default for DFOneState<TReal> {
+    fn default() -> Self {
+        DFOneState{xvs: [TReal::zero(); 3], yvs: [TReal::zero(); 3]}
+    }
+}
+
 #[repr(C)]
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Default)]
 pub struct DFOneBiQuad<TReal: Numeric> {
     pub coeffs: SecondOrderSection<TReal>,
     pub state: DFOneState<TReal>
@@ -23,12 +29,6 @@ pub struct DFOneBiQuad<TReal: Numeric> {
 #[inline]
 pub fn nil<TReal: Numeric>() -> DFOneState<TReal> {
     DFOneState {xvs: [TReal::zero(), TReal::zero(), TReal::zero()], yvs: [TReal::zero(), TReal::zero(), TReal::zero()]}
-}
-
-impl Default for ::sos::df_one::DFOneBiQuad<f32> {
-    fn default() -> ::sos::df_one::DFOneBiQuad<f32> {
-        ::sos::df_one::DFOneBiQuad::<f32>{coeffs: ::sos::one::<f32>(), state: ::sos::df_one::nil::<f32>()}
-    }
 }
 
 impl<TReal: Numeric> BiQuadFilter<TReal> for DFOneBiQuad<TReal> {
