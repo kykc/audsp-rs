@@ -17,7 +17,7 @@ impl Numeric for f32 {
 }
 
 #[allow(dead_code)]
-fn rn<TReal: Numeric, TSubj: Numeric>(x: TSubj) -> TReal {
+pub fn rn<TReal: Numeric, TSubj: Numeric>(x: TSubj) -> TReal {
     TReal::from(x).unwrap()
 }
 
